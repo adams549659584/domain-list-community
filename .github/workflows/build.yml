@@ -36,9 +36,9 @@ jobs:
         run: |
           domain-list-community
 
-      - name: Generate dlc.dat sha256 hash
-        run: |
-          sha256sum dlc.dat > dlc.dat.sha256sum
+      # - name: Generate dlc.dat sha256 hash
+      #   run: |
+      #     sha256sum dlc.dat > dlc.dat.sha256sum
 
       # - name: Git push assets to "release" branch
       #   run: |
@@ -86,4 +86,4 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: domain-list-communtiy
-          path: ./
+          path: ./dlc.dat

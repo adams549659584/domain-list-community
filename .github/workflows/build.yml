@@ -83,8 +83,8 @@ jobs:
       #     asset_content_type: text/plain
       
       - name: Upload firmware directory
-      uses: actions/upload-artifact@master
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: domain-list-communtiy
-        path: ./
+        uses: actions/upload-artifact@master
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        with:
+          name: domain-list-communtiy
+          path: ./

@@ -1,14 +1,17 @@
 name: Build dlc.dat
 on:
-  schedule:
-    - cron: "0 0 * * 3"
+  # schedule:
+  #   - cron: "0 0 * * 3"
   push:
     branches:
       - master
+  watch:
+    types: started  
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
       - name: Setup Go 1.14
@@ -37,44 +40,51 @@ jobs:
         run: |
           sha256sum dlc.dat > dlc.dat.sha256sum
 
-      - name: Git push assets to "release" branch
-        run: |
-          git init
-          git config --local user.name "${{ github.actor }}"
-          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
-          git checkout -b release
-          git add dlc.dat dlc.dat.sha256sum
-          git commit -m "${{ env.RELEASE_NAME }}"
-          git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
-          git push -f -u origin release
+      # - name: Git push assets to "release" branch
+      #   run: |
+      #     git init
+      #     git config --local user.name "${{ github.actor }}"
+      #     git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+      #     git checkout -b release
+      #     git add dlc.dat dlc.dat.sha256sum
+      #     git commit -m "${{ env.RELEASE_NAME }}"
+      #     git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+      #     git push -f -u origin release
 
-      - name: Create a release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: ${{ env.RELEASE_NAME }}
-          draft: false
-          prerelease: false
+      # - name: Create a release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ env.TAG_NAME }}
+      #     release_name: ${{ env.RELEASE_NAME }}
+      #     draft: false
+      #     prerelease: false
 
-      - name: Upload dlc.dat
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dlc.dat
-          asset_name: dlc.dat
-          asset_content_type: application/octet-stream
+      # - name: Upload dlc.dat
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./dlc.dat
+      #     asset_name: dlc.dat
+      #     asset_content_type: application/octet-stream
 
-      - name: Upload dlc.dat sha256sum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dlc.dat.sha256sum
-          asset_name: dlc.dat.sha256sum
-          asset_content_type: text/plain
+      # - name: Upload dlc.dat sha256sum
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./dlc.dat.sha256sum
+      #     asset_name: dlc.dat.sha256sum
+      #     asset_content_type: text/plain
+      
+      - name: Upload firmware directory
+      uses: actions/upload-artifact@master
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: domain-list-communtiy
+        path: ./
